@@ -18,7 +18,6 @@ async function convertHEICtoPNG() {
     
             files.forEach(async file => {
     
-                // check for HEIC file type
                 if (!file.endsWith('.HEIC')) {
                     return;
                 }
