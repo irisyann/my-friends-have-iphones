@@ -9,6 +9,12 @@ async function convertHEICtoPNG() {
     const inputFolderDir = path.join(__dirname, 'heic_photos');
 
     fs.readdir(inputFolderDir, (err, files) => {
+
+        if (!files || files.length === 0) {
+            console.log("No files found in the directory.")
+            return;
+        }
+
         files.forEach(async file => {
 
             // check for HEIC file type
