@@ -10,6 +10,9 @@ npm install
 ```
 
 ## Run
-```bash
-npm start
-```
+1. Upload your HEIC photos to the `heic_photos` folder.
+2. Run the following command:
+    ```bash
+    npm start
+    ```
+3. Your converted photos will be in the `converted_photos` folder.
