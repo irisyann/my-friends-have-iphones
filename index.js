@@ -11,8 +11,6 @@ async function convertHEICtoPNG() {
             const inputFileDir = path.join(__dirname, 'heic_photos', file);
             const outputFileDir = path.join(__dirname, 'converted_photos', file.replace('.HEIC', '.png'));
 
-            console.log(inputFileDir)
-
             const inputBuffer = await promisify(fs.readFile)(inputFileDir);
             const outputBuffer = await convert({
                 buffer: inputBuffer, 
