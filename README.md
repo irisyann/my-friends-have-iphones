@@ -5,7 +5,7 @@
 ## Setup
 ```bash
 git clone https://github.com/irisyann/my-friends-have-iphones.git
-cd
+cd my-friends-have-iphones
 npm install
 ```
 
