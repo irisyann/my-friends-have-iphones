@@ -3,8 +3,6 @@ const fs = require('fs');
 const convert = require('heic-convert');
 const { promisify } = require('util');
 
-const CONVERTED_FORMAT = 'PNG';
-
 async function convertHEICtoPNG() {
     try {
         const inputFolderDir = path.join(__dirname, 'heic_photos');
@@ -15,6 +13,8 @@ async function convertHEICtoPNG() {
                 console.log("No files found in the directory.")
                 return;
             }
+
+            console.log(`Found ${files.length} files in the directory. Beginning conversion...`)
     
             files.forEach(async file => {
     
@@ -28,14 +28,15 @@ async function convertHEICtoPNG() {
                 const inputBuffer = await promisify(fs.readFile)(inputFileDir);
                 const outputBuffer = await convert({
                     buffer: inputBuffer, 
-                    format: CONVERTED_FORMAT,     
+                    format: 'PNG',     
                     quality: 1           
                 });
                 
                 await promisify(fs.writeFile)(outputFileDir, outputBuffer);
     
-                console.log(`File converted successfully at : ${outputFileDir}`);
+                console.log(`File converted successfully at: ${outputFileDir}`);
             });
+
         });
     } catch (error) {
         console.log(error);
