@@ -8,6 +8,12 @@ async function convertHEICtoPNG() {
 
     fs.readdir(inputFolderDir, (err, files) => {
         files.forEach(async file => {
+            
+            // check for HEIC file type
+            if (!file.endsWith('.HEIC')) {
+                return;
+            }
+
             const inputFileDir = path.join(__dirname, 'heic_photos', file);
             const outputFileDir = path.join(__dirname, 'converted_photos', file.replace('.HEIC', '.png'));
 
