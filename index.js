@@ -6,35 +6,42 @@ const { promisify } = require('util');
 const CONVERTED_FORMAT = 'PNG';
 
 async function convertHEICtoPNG() {
-    const inputFolderDir = path.join(__dirname, 'heic_photos');
+    try {
+        const inputFolderDir = path.join(__dirname, 'heic_photos');
 
-    fs.readdir(inputFolderDir, (err, files) => {
-
-        if (!files || files.length === 0) {
-            console.log("No files found in the directory.")
-            return;
-        }
-
-        files.forEach(async file => {
-
-            // check for HEIC file type
-            if (!file.endsWith('.HEIC')) {
+        fs.readdir(inputFolderDir, (err, files) => {
+    
+            if (!files || files.length === 0) {
+                console.log("No files found in the directory.")
                 return;
             }
-
-            const inputFileDir = path.join(__dirname, 'heic_photos', file);
-            const outputFileDir = path.join(__dirname, 'converted_photos', file.replace('.HEIC', '.png'));
-
-            const inputBuffer = await promisify(fs.readFile)(inputFileDir);
-            const outputBuffer = await convert({
-                buffer: inputBuffer, 
-                format: CONVERTED_FORMAT,     
-                quality: 1           
+    
+            files.forEach(async file => {
+    
+                // check for HEIC file type
+                if (!file.endsWith('.HEIC')) {
+                    return;
+                }
+    
+                const inputFileDir = path.join(__dirname, 'heic_photos', file);
+                const outputFileDir = path.join(__dirname, 'converted_photos', file.replace('.HEIC', '.png'));
+    
+                const inputBuffer = await promisify(fs.readFile)(inputFileDir);
+                const outputBuffer = await convert({
+                    buffer: inputBuffer, 
+                    format: CONVERTED_FORMAT,     
+                    quality: 1           
+                });
+                
+                await promisify(fs.writeFile)(outputFileDir, outputBuffer);
+    
+                console.log(`File converted successfully at : ${outputFileDir}`);
             });
-            
-            await promisify(fs.writeFile)(outputFileDir, outputBuffer);
         });
-    });
+    } catch (error) {
+        console.log(error);
+    }
+    
 }
 
 convertHEICtoPNG();
