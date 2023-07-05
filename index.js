@@ -3,12 +3,14 @@ const fs = require('fs');
 const convert = require('heic-convert');
 const { promisify } = require('util');
 
+const CONVERTED_FORMAT = 'PNG';
+
 async function convertHEICtoPNG() {
     const inputFolderDir = path.join(__dirname, 'heic_photos');
 
     fs.readdir(inputFolderDir, (err, files) => {
         files.forEach(async file => {
-            
+
             // check for HEIC file type
             if (!file.endsWith('.HEIC')) {
                 return;
@@ -20,7 +22,7 @@ async function convertHEICtoPNG() {
             const inputBuffer = await promisify(fs.readFile)(inputFileDir);
             const outputBuffer = await convert({
                 buffer: inputBuffer, 
-                format: 'PNG',     
+                format: CONVERTED_FORMAT,     
                 quality: 1           
             });
             
