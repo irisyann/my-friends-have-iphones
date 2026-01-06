@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HEIC to PNG Converter - My Friends Have iPhones</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #1a2332;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #ff8c00;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+
+        .upload-area {
+            border: 3px dashed #ff9500;
+            border-radius: 15px;
+            padding: 60px 20px;
+            text-align: center;
+            background: #f8f9ff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+        }
+
+        .upload-area:hover {
+            background: #fff8f0;
+            border-color: #ff6f00;
+        }
+
+        .upload-area.dragover {
+            background: #fff3e0;
+            border-color: #ff6f00;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .upload-text {
+            font-size: 1.2em;
+            color: #ff8c00;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .upload-subtext {
+            color: #999;
+            font-size: 0.9em;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .file-list {
+            margin-top: 20px;
+        }
+
+        .file-item {
+            background: #f8f9ff;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .file-thumbnail {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            object-fit: cover;
+            background: #e0e0e0;
+            flex-shrink: 0;
+            display: none;
+        }
+
+        .file-thumbnail.loaded {
+            display: block;
+        }
+
+        .file-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .file-status {
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .file-status.converting {
+            color: #ff8c00;
+        }
+
+        .file-status.success {
+            color: #10b981;
+        }
+
+        .file-status.error {
+            color: #ef4444;
+        }
+
+        .download-btn {
+            background: #ff9500;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .download-btn:hover {
+            background: #ff6f00;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 149, 0, 0.4);
+        }
+
+        .download-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .convert-all-btn {
+            width: 100%;
+            background: #ff6f00;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .convert-all-btn:hover:not(:disabled) {
+            background: #ff9500;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 111, 0, 0.4);
+        }
+
+        .convert-all-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .info-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ffa726, #ff6f00);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid #ff8c00;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        footer {
+            margin-top: 30px;
+            text-align: center;
+            color: white;
+            opacity: 0.9;
+        }
+
+        footer a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .upload-area {
+                padding: 40px 15px;
+            }
+
+            .upload-icon {
+                font-size: 3em;
+            }
+
+            .file-item {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .file-thumbnail {
+                width: 50px;
+                height: 50px;
+            }
+
+            .file-name {
+                font-size: 0.95em;
+                word-break: break-word;
+            }
+
+            .download-btn {
+                width: 100%;
+                padding: 12px;
+            }
+
+            .convert-all-btn {
+                padding: 12px;
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📱 HEIC to PNG Converter</h1>
+        <p class="subtitle">Created by someone who is always getting photos sent from friends with iPhones</p>
+        
+        <div class="info-box">
+            <strong>⚠️ Note:</strong> All conversions happen in your browser. Your photos never leave your device!
+        </div>
+
+        <div class="upload-area" id="uploadArea">
+            <div class="upload-icon">📷</div>
+            <div class="upload-text">Drag & Drop HEIC files here</div>
+            <div class="upload-subtext">or click to browse</div>
+            <input type="file" id="fileInput" accept=".heic,.HEIC" multiple>
+        </div>
+
+        <div class="file-list" id="fileList"></div>
+        
+        <button class="convert-all-btn" id="convertAllBtn" style="display: none;" disabled>
+            Convert All Files
+        </button>
+    </div>
+
+    <footer>
+        <p style="margin-top: 10px;">Made by <a href="https://github.com/irisyann" target="_blank">@irisyann</a></p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const fileList = document.getElementById('fileList');
+        const convertAllBtn = document.getElementById('convertAllBtn');
+
+        let files = [];
+
+        // Handle click on upload area
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // Handle drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            const droppedFiles = Array.from(e.dataTransfer.files).filter(file => 
+                file.name.toLowerCase().endsWith('.heic')
+            );
+            
+            if (droppedFiles.length > 0) {
+                addFiles(droppedFiles);
+            }
+        });
+
+        // Handle file input change
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                addFiles(Array.from(e.target.files));
+            }
+        });
+
+        function addFiles(newFiles) {
+            newFiles.forEach(file => {
+                const fileId = Date.now() + Math.random();
+                files.push({
+                    id: fileId,
+                    file: file,
+                    status: 'pending',
+                    convertedBlob: null
+                });
+                addFileToList(fileId, file.name);
+            });
+
+            convertAllBtn.style.display = 'block';
+            convertAllBtn.disabled = false;
+        }
+
+        function addFileToList(fileId, fileName) {
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-item';
+            fileItem.id = `file-${fileId}`;
+            fileItem.innerHTML = `
+                <img class="file-thumbnail" id="thumbnail-${fileId}" alt="Preview">
+                <div class="file-info">
+                    <div class="file-name">${fileName}</div>
+                    <div class="file-status" id="status-${fileId}">Ready to convert</div>
+                    <div class="progress-bar" id="progress-${fileId}" style="display: none;">
+                        <div class="progress-fill" id="progress-fill-${fileId}"></div>
+                    </div>
+                </div>
+                <button class="download-btn" id="download-${fileId}" style="display: none;">
+                    Download PNG
+                </button>
+            `;
+            fileList.appendChild(fileItem);
+        }
+
+        async function convertFile(fileObj) {
+            const statusEl = document.getElementById(`status-${fileObj.id}`);
+            const progressEl = document.getElementById(`progress-${fileObj.id}`);
+            const progressFillEl = document.getElementById(`progress-fill-${fileObj.id}`);
+            const downloadBtn = document.getElementById(`download-${fileObj.id}`);
+
+            try {
+                statusEl.innerHTML = '<span class="spinner"></span>Converting...';
+                statusEl.className = 'file-status converting';
+                progressEl.style.display = 'block';
+                progressFillEl.style.width = '30%';
+
+                const blob = await heic2any({
+                    blob: fileObj.file,
+                    toType: 'image/png',
+                    quality: 1
+                });
+
+                progressFillEl.style.width = '100%';
+                
+                fileObj.convertedBlob = blob;
+                fileObj.status = 'success';
+
+                // Display thumbnail
+                const thumbnailEl = document.getElementById(`thumbnail-${fileObj.id}`);
+                const thumbnailUrl = URL.createObjectURL(blob);
+                thumbnailEl.src = thumbnailUrl;
+                thumbnailEl.classList.add('loaded');
+                fileObj.thumbnailUrl = thumbnailUrl;
+
+                statusEl.textContent = '✓ Converted successfully!';
+                statusEl.className = 'file-status success';
+                
+                downloadBtn.style.display = 'block';
+                downloadBtn.onclick = () => downloadFile(fileObj);
+
+            } catch (error) {
+                console.error('Conversion error:', error);
+                fileObj.status = 'error';
+                statusEl.textContent = '✗ Conversion failed: ' + error.message;
+                statusEl.className = 'file-status error';
+                progressFillEl.style.width = '100%';
+                progressFillEl.style.background = '#ef4444';
+            }
+        }
+
+        function downloadFile(fileObj) {
+            const originalName = fileObj.file.name.replace(/\.heic$/i, '');
+            const url = URL.createObjectURL(fileObj.convertedBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${originalName}.png`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        convertAllBtn.addEventListener('click', async () => {
+            convertAllBtn.disabled = true;
+            convertAllBtn.textContent = 'Converting...';
+
+            for (const fileObj of files) {
+                if (fileObj.status === 'pending') {
+                    await convertFile(fileObj);
+                }
+            }
+
+            convertAllBtn.textContent = 'All Files Converted!';
+        });
+    </script>
+</body>
+</html>
